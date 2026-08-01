@@ -1,4 +1,4 @@
-import time
+import time  # noqa: A005, D100
 
 import busio
 import displayio
@@ -19,17 +19,23 @@ else:
 
 
 class DisplayConfig:
+    """Configuration for the SSD1305 display."""
+
     width = 128
     height = 32
 
 
 class FontConfig:
+    """Configuration for display font."""
+
     file: str = "/fonts/5x8.bdf"
     char_width: int = 5
     char_height: int = 8
 
 
 class Config:
+    """Static configuration variables."""
+
     display: DisplayConfig = DisplayConfig()
     font: FontConfig = FontConfig()
     scroll_interval_s: float = 0.6
@@ -37,15 +43,20 @@ class Config:
 
     @property
     def max_chars_x(self) -> int:
+        """Maximum displayable characters along width."""
         return self.display.width // self.font.char_width
 
     @property
     def max_chars_y(self) -> int:
+        """Maximum displayable characters along height."""
         return self.display.height // self.font.char_height
 
 
 class StatusDisplay:
-    def __init__(self):
+    """Main display."""
+
+    def __init__(self) -> None:
+        """Instantiate config, set up display and updaters."""
         self.config = Config()
         self.display = self.get_display()
         self.font = bitmap_font.load_font(self.config.font.file)
@@ -54,6 +65,7 @@ class StatusDisplay:
         self.dynamic_labels: list[bitmap_label.Label] = []
 
     def get_display(self) -> SSD1305:
+        """Initialize display."""
         displayio.release_displays()
 
         spi = busio.SPI(clock=board.GP10, MOSI=board.GP11)
@@ -65,13 +77,14 @@ class StatusDisplay:
             baudrate=1000000,
         )
 
-        display = SSD1305(
-            display_bus, width=self.config.display.width, height=self.config.display.height
+        return SSD1305(
+            display_bus,
+            width=self.config.display.width,
+            height=self.config.display.height,
         )
 
-        return display
-
-    def run(self) -> None:
+    def main_loop(self) -> None:
+        """Run main synchronous loop."""
         text = bitmap_label.Label(self.font, text="test static text", x=0, y=4)  # ty: ignore[invalid-argument-type]
         scroll = bitmap_label.Label(
             self.font,  # ty: ignore[invalid-argument-type]
@@ -90,9 +103,9 @@ class StatusDisplay:
             time.sleep(self.config.update_interval_s)
 
 
-def main() -> None:
+def main() -> None:  # noqa: D103
     status = StatusDisplay()
-    status.run()
+    status.main_loop()
 
 
 if __name__ == "__main__":
