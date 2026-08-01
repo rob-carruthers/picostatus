@@ -33,6 +33,14 @@ class Config:
     display: DisplayConfig = DisplayConfig()
     font: FontConfig = FontConfig()
 
+    @property
+    def max_chars_x(self) -> int:
+        return self.display.width // self.font.char_width
+
+    @property
+    def max_chars_y(self) -> int:
+        return self.display.height // self.font.char_height
+
 
 class StatusDisplay:
     def __init__(self):
