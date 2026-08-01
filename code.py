@@ -49,6 +49,9 @@ class StatusDisplay:
         self.config = Config()
         self.display = self.get_display()
         self.font = bitmap_font.load_font(self.config.font.file)
+        self.display_group = displayio.Group()
+        self.display.root_group = self.display_group
+        self.dynamic_labels: list[bitmap_label.Label] = []
 
     def get_display(self) -> SSD1305:
         displayio.release_displays()
@@ -69,7 +72,6 @@ class StatusDisplay:
         return display
 
     def run(self) -> None:
-        group = displayio.Group()
         text = bitmap_label.Label(self.font, text="test static text", x=0, y=4)  # ty: ignore[invalid-argument-type]
         scroll = bitmap_label.Label(
             self.font,  # ty: ignore[invalid-argument-type]
@@ -79,12 +81,12 @@ class StatusDisplay:
             y=20,
             animate_time=self.config.scroll_interval_s,
         )
-        group.append(text)
-        group.append(scroll)
-        self.display.root_group = group
+        self.display_group.append(text)
+        self.display_group.append(scroll)
+        self.dynamic_labels.append(scroll)
 
         while True:
-            scroll.update()
+            [e.update() for e in self.dynamic_labels]
             time.sleep(self.config.update_interval_s)
 
 
