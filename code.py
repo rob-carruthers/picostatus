@@ -118,13 +118,20 @@ class StatusDisplay:
             y=20,
             animate_time=self.config.scroll_interval_s,
         )
+        input_label = bitmap_label.Label(self.font, text="test static text", x=89, y=4)  # ty: ignore[invalid-argument-type]
         self.display_group.append(text)
         self.display_group.append(scroll)
+        self.display_group.append(input_label)
         self.dynamic_labels.append(scroll)
+        self.dynamic_labels.append(input_label)
 
         while True:
             for e in self.dynamic_labels:
                 e.update()
+
+            input_text = self.get_input()
+            if input_text is not None:
+                input_label.text = input_text
 
             time.sleep(self.config.update_interval_s)
 
