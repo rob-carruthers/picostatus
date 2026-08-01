@@ -84,11 +84,15 @@ class StatusDisplay:
             baudrate=1000000,
         )
 
-        return SSD1305(
+        display = SSD1305(
             display_bus,
             width=self.config.display.width,
             height=self.config.display.height,
         )
+
+        display.auto_refresh = False
+
+        return display
 
     def get_input(self) -> str | None:
         if self.serial is None:
@@ -133,6 +137,7 @@ class StatusDisplay:
             if input_text is not None:
                 input_label.text = input_text
 
+            self.display.refresh()
             time.sleep(self.config.update_interval_s)
 
 
