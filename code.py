@@ -99,7 +99,9 @@ class StatusDisplay:
         self.dynamic_labels.append(scroll)
 
         while True:
-            [e.update() for e in self.dynamic_labels]
+            for e in self.dynamic_labels:
+                e.update()
+
             time.sleep(self.config.update_interval_s)
 
 
