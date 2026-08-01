@@ -32,6 +32,8 @@ class FontConfig:
 class Config:
     display: DisplayConfig = DisplayConfig()
     font: FontConfig = FontConfig()
+    scroll_interval_s: float = 0.6
+    update_interval_s: float = 0.05
 
     @property
     def max_chars_x(self) -> int:
@@ -75,7 +77,7 @@ class StatusDisplay:
             max_characters=8,
             x=0,
             y=20,
-            animate_time=0.5,
+            animate_time=self.config.scroll_interval_s,
         )
         group.append(text)
         group.append(scroll)
@@ -83,7 +85,7 @@ class StatusDisplay:
 
         while True:
             scroll.update()
-            time.sleep(0.05)
+            time.sleep(self.config.update_interval_s)
 
 
 def main() -> None:
