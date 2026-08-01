@@ -3,6 +3,7 @@ import time  # noqa: A005, D100
 import busio
 import displayio
 import fourwire
+import usb_cdc
 from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text import bitmap_label
 from adafruit_displayio_ssd1305 import SSD1305
@@ -63,6 +64,12 @@ class StatusDisplay:
         self.display_group = displayio.Group()
         self.display.root_group = self.display_group
         self.dynamic_labels: list[bitmap_label.Label] = []
+        self.serial = usb_cdc.data
+        self.buffer = b""
+
+        if self.serial is None:
+            msg = "USB CDC not enabled."
+            raise TypeError(msg)
 
     def get_display(self) -> SSD1305:
         """Initialize display."""
@@ -82,6 +89,23 @@ class StatusDisplay:
             width=self.config.display.width,
             height=self.config.display.height,
         )
+
+    def get_input(self) -> str | None:
+        if self.serial is None:
+            msg = "USB CDC not enabled."
+            raise TypeError(msg)
+
+        waiting = self.serial.in_waiting
+        if not waiting:
+            return None
+
+        self.buffer += self.serial.read(waiting)
+
+        if b"\n" in self.buffer:
+            line, self.buffer = self.buffer.split(b"\n", 1)
+            return line.decode("utf-8", "replace").strip()
+
+        return None
 
     def main_loop(self) -> None:
         """Run main synchronous loop."""
