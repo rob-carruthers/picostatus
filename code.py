@@ -94,7 +94,11 @@ class StatusDisplay:
 
         return display
 
-    def get_input(self) -> str | None:
+    def get_cdc_input_with_buffer(self, max_buffer: int = 4096) -> str | None:
+        """Read serial input and return str data, if valid.
+
+        This keeps a buffer but will only return the latest received input.
+        """
         if self.serial is None:
             msg = "USB CDC not enabled."
             raise TypeError(msg)
@@ -104,12 +108,21 @@ class StatusDisplay:
             return None
 
         self.buffer += self.serial.read(waiting)
+        if len(self.buffer) > max_buffer:
+            self.buffer = self.buffer[-max_buffer:]
 
-        if b"\n" in self.buffer:
-            line, self.buffer = self.buffer.split(b"\n", 1)
-            return line.decode("utf-8", "replace").strip()
+        if b"\n" not in self.buffer:
+            return None
 
-        return None
+        lines = self.buffer.split(b"\n")
+        self.buffer = lines[-1]
+        complete_lines = lines[:-1]
+
+        if not complete_lines:
+            return None
+
+        latest = complete_lines[-1]
+        return latest.decode("utf-8", "replace").strip()
 
     def main_loop(self) -> None:
         """Run main synchronous loop."""
@@ -133,7 +146,7 @@ class StatusDisplay:
             for e in self.dynamic_labels:
                 e.update()
 
-            input_text = self.get_input()
+            input_text = self.get_cdc_input_with_buffer()
             if input_text is not None:
                 input_label.text = input_text
 
