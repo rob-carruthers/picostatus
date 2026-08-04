@@ -7,6 +7,7 @@ from mpd import MPDClient
 
 PORT = "/dev/ttyACM1"
 BAUD = 115200
+INTERVAL_SECS = 0.5
 
 client = MPDClient()
 client.connect(host="localhost", port=6600)
@@ -33,10 +34,14 @@ def get_mpd_data() -> tuple[str, int, int]:
 
 
 with serial.Serial(PORT, BAUD, timeout=1) as ser:
+    now_playing, pos, dur = get_mpd_data()
+    total_time = 0.0
     while True:
         now = datetime.datetime.now(tz=datetime.UTC).astimezone()
         nowstr = now.strftime("%H:%M:%S")
-        now_playing, pos, dur = get_mpd_data()
+
+        if total_time % 2 == 0:
+            now_playing, pos, dur = get_mpd_data()
         out_data = {
             "time": {"text": nowstr},
             "mpd": {"text": now_playing, "dur": dur, "pos": pos},
@@ -44,4 +49,5 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
         out_json = json.dumps(out_data)
 
         ser.write(f"{out_json}\n".encode())
-        time.sleep(0.5)
+        time.sleep(INTERVAL_SECS)
+        total_time += INTERVAL_SECS
