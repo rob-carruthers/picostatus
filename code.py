@@ -163,10 +163,48 @@ class StatusDisplay:
         self.dynamic_labels: list[bitmap_label.Label] = []
         self.serial = usb_cdc.data
         self.buffer = b""
+        self.modules = self.setup_modules()
 
         if self.serial is None:
             msg = "USB CDC not enabled."
             raise TypeError(msg)
+
+    def setup_modules(self) -> list[Module]:
+        modules = [
+            Module(
+                self.config,
+                self.font,
+                "time",
+                align="right",
+                max_chars=8,
+                y_char=0,
+            ),
+            Module(
+                self.config,
+                self.font,
+                "pacman",
+                align="left",
+                max_chars=12,
+                y_char=0,
+            ),
+            MPDModule(
+                self.config,
+                self.font,
+                "mpd",
+                align="left",
+                y_char=2,
+                max_chars=self.config.max_chars_x,
+                animate_time=0.5,
+            ),
+        ]
+
+        for module in modules:
+            for element in module.display_elements:
+                self.display_group.append(element)
+                if isinstance(element, bitmap_label.Label):
+                    self.dynamic_labels.append(element)
+
+        return modules
 
     def get_display(self) -> SSD1305:
         """Initialize display."""
@@ -223,40 +261,11 @@ class StatusDisplay:
 
     def main_loop(self) -> None:
         """Run main synchronous loop."""
-        text = bitmap_label.Label(self.font, text="test static text", x=0, y=4)  # ty: ignore[invalid-argument-type]
-        scroll = bitmap_label.Label(
-            self.font,  # ty: ignore[invalid-argument-type]
-            text="test scrolling text",
-            max_characters=8,
-            x=0,
-            y=20,
-            animate_time=self.config.scroll_interval_s,
-        )
-
-        modules = [
-            Module(self.config, self.font, "time", align="right", max_chars=8, y_char=0),
-            Module(self.config, self.font, "pacman", align="left", max_chars=12, y_char=0),
-            MPDModule(
-                self.config,
-                self.font,
-                "mpd",
-                align="left",
-                y_char=2,
-                max_chars=self.config.max_chars_x,
-                animate_time=0.5,
-            ),
-        ]
-        for module in modules:
-            for element in module.display_elements:
-                self.display_group.append(element)
-                if isinstance(element, bitmap_label.Label):
-                    self.dynamic_labels.append(element)
-
         while True:
             input_data_str = self.get_cdc_input_with_buffer()
             if input_data_str is not None:
                 input_data: dict[InputDataType, dict[str, Any]] = json.loads(input_data_str)
-                for module in modules:
+                for module in self.modules:
                     module.update(input_data)
 
             for e in self.dynamic_labels:
