@@ -1,5 +1,6 @@
 import datetime
 import json
+import subprocess
 import time
 
 import serial
@@ -33,18 +34,39 @@ def get_mpd_data() -> tuple[str, int, int]:
     return now_playing, pos, dur
 
 
+def get_n_updates() -> str:
+    proc = subprocess.run("/usr/bin/checkupdates", check=True, capture_output=True)
+    n = len([line for line in proc.stdout.decode().split("\n") if line])
+
+    if n == 0:
+        return "No updates"
+    if n == 1:
+        return "1 update"
+
+    return f"{n} updates"
+
+
 with serial.Serial(PORT, BAUD, timeout=1) as ser:
+    n_updates = get_n_updates()
+
     now_playing, pos, dur = get_mpd_data()
+
     total_time = 0.0
+
     while True:
         now = datetime.datetime.now(tz=datetime.UTC).astimezone()
         nowstr = now.strftime("%H:%M:%S")
 
         if total_time % 2 == 0:
             now_playing, pos, dur = get_mpd_data()
+
+        if total_time % 1800 == 0:
+            n_updates = get_n_updates()
+
         out_data = {
             "time": {"text": nowstr},
             "mpd": {"text": now_playing, "dur": dur, "pos": pos},
+            "pacman": {"text": n_updates},
         }
         out_json = json.dumps(out_data)
 

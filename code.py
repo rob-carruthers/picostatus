@@ -17,7 +17,7 @@ except ImportError:
 if TYPE_CHECKING:
     from board_definitions import raspberry_pi_pico2 as board
 
-    InputDataType = Literal["time", "mpd"]
+    InputDataType = Literal["time", "mpd", "pacman"]
 else:
     import board
 
@@ -235,6 +235,7 @@ class StatusDisplay:
 
         modules = [
             Module(self.config, self.font, "time", align="right", max_chars=8, y_char=0),
+            Module(self.config, self.font, "pacman", align="left", max_chars=12, y_char=0),
             MPDModule(
                 self.config,
                 self.font,
