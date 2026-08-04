@@ -1,4 +1,5 @@
 import datetime
+import json
 import time
 
 import serial
@@ -10,5 +11,7 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
     while True:
         now = datetime.datetime.now(tz=datetime.UTC).astimezone()
         nowstr = now.strftime("%H:%M:%S")
-        ser.write(f"{nowstr}\n".encode())
+        out_data = {"time": nowstr}
+        out_json = json.dumps(out_data)
+        ser.write(f"{out_json}\n".encode())
         time.sleep(0.5)

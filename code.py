@@ -1,4 +1,5 @@
-import time  # noqa: A005, D100
+import json
+import time
 
 import busio
 import displayio
@@ -9,12 +10,14 @@ from adafruit_display_text import bitmap_label
 from adafruit_displayio_ssd1305 import SSD1305
 
 try:
-    from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING, Literal
 except ImportError:
     TYPE_CHECKING = False  # ty: ignore[invalid-assignment]
 
 if TYPE_CHECKING:
     from board_definitions import raspberry_pi_pico2 as board
+
+    InputDataType = Literal["time"]
 else:
     import board
 
@@ -51,6 +54,45 @@ class Config:
     def max_chars_y(self) -> int:
         """Maximum displayable characters along height."""
         return self.display.height // self.font.char_height
+
+    @property
+    def line_pos_y(self) -> dict[int, int]:
+        output: dict[int, int] = {}
+
+        for i in range(self.max_chars_y):
+            output[i] = i * self.font.char_height + 4
+
+        return output
+
+
+class Module:
+    def __init__(
+        self,
+        config: Config,
+        font,
+        input_key: InputDataType,
+        x_char: int,
+        y_char: int,
+        scroll: tuple[int, float] | None = None,
+    ) -> None:
+        self.input_key = input_key
+        self.line = y_char
+        x = (((config.max_chars_x + x_char) * config.font.char_width) % config.display.width) - 1
+        max_chars = scroll[0] if scroll is not None else None
+        animate_time = scroll[1] if scroll is not None else 1.0
+        self.label = bitmap_label.Label(
+            font,
+            text="",
+            x=x,
+            y=config.line_pos_y[y_char],
+            max_characters=max_chars,
+            animate_time=animate_time,
+        )
+
+    def update(self, input_data: dict[InputDataType, str]) -> None:
+        text = input_data[self.input_key]
+        if self.label.text != text:
+            self.label.text = text
 
 
 class StatusDisplay:
@@ -135,20 +177,21 @@ class StatusDisplay:
             y=20,
             animate_time=self.config.scroll_interval_s,
         )
-        input_label = bitmap_label.Label(self.font, text="test static text", x=89, y=4)  # ty: ignore[invalid-argument-type]
-        self.display_group.append(text)
-        self.display_group.append(scroll)
-        self.display_group.append(input_label)
-        self.dynamic_labels.append(scroll)
-        self.dynamic_labels.append(input_label)
+
+        modules = [Module(self.config, self.font, "time", x_char=-7, y_char=0)]
+        for module in modules:
+            self.display_group.append(module.label)
+            self.dynamic_labels.append(module.label)
 
         while True:
+            input_data_str = self.get_cdc_input_with_buffer()
+            if input_data_str is not None:
+                input_data: dict[InputDataType, str] = json.loads(input_data_str)
+                for module in modules:
+                    module.update(input_data)
+
             for e in self.dynamic_labels:
                 e.update()
-
-            input_text = self.get_cdc_input_with_buffer()
-            if input_text is not None:
-                input_label.text = input_text
 
             self.display.refresh()
             time.sleep(self.config.update_interval_s)
