@@ -17,7 +17,7 @@ except ImportError:
 if TYPE_CHECKING:
     from board_definitions import raspberry_pi_pico2 as board
 
-    InputDataType = Literal["time"]
+    InputDataType = Literal["time", "mpd"]
 else:
     import board
 
@@ -183,7 +183,17 @@ class StatusDisplay:
             animate_time=self.config.scroll_interval_s,
         )
 
-        modules = [Module(self.config, self.font, "time", x_char=-7, y_char=0)]
+        modules = [
+            Module(self.config, self.font, "time", align="right", max_chars=8, y_char=0),
+            Module(
+                self.config,
+                self.font,
+                "mpd",
+                align="left",
+                y_char=2,
+                max_chars=20,
+            ),
+        ]
         for module in modules:
             self.display_group.append(module.label)
             self.dynamic_labels.append(module.label)
