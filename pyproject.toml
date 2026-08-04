@@ -10,6 +10,7 @@ dependencies = [
   "adafruit-blinka",
   "circuitpython-stubs",
   "pyserial",
+  "python-mpd2",
 ]
 
 [tool.ruff]

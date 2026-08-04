@@ -187,6 +187,7 @@ dependencies = [
     { name = "adafruit-circuitpython-displayio-ssd1305" },
     { name = "circuitpython-stubs" },
     { name = "pyserial" },
+    { name = "python-mpd2" },
 ]
 
 [package.metadata]
@@ -196,6 +197,7 @@ requires-dist = [
     { name = "adafruit-circuitpython-displayio-ssd1305" },
     { name = "circuitpython-stubs" },
     { name = "pyserial" },
+    { name = "python-mpd2" },
 ]
 
 [[package]]
@@ -217,6 +219,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb", size = 159125, upload-time = "2020-11-23T03:59:15.045Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/bc/587a445451b253b285629263eb51c2d8e9bcea4fc97826266d186f96f558/pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0", size = 90585, upload-time = "2020-11-23T03:59:13.41Z" },
+]
+
+[[package]]
+name = "python-mpd2"
+version = "3.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/be/e77206eb35eb37ccd3506fba237e1431431d04c482707730ce2a6802e95c/python-mpd2-3.1.1.tar.gz", hash = "sha256:4baec3584cc43ed9948d5559079fafc2679b06b2ade273e909b3582654b2b3f5", size = 58713, upload-time = "2024-01-13T11:47:42.032Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8e/6d/1b9e1c203057c9a7fa6971db3605188a8ef1120ca305e4878c960ab6e2d3/python_mpd2-3.1.1-py2.py3-none-any.whl", hash = "sha256:86bf1100a0b135959d74a9a7a58cf0515bf30bb54eb25ae6fb8e175e50300fc3", size = 35050, upload-time = "2024-01-13T11:47:40.013Z" },
 ]
 
 [[package]]

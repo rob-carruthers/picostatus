@@ -10,7 +10,7 @@ from adafruit_display_text import bitmap_label
 from adafruit_displayio_ssd1305 import SSD1305
 
 try:
-    from typing import TYPE_CHECKING, Literal
+    from typing import TYPE_CHECKING, Any, Literal
 except ImportError:
     TYPE_CHECKING = False  # ty: ignore[invalid-assignment]
 
@@ -94,10 +94,60 @@ class Module:
             self.label.x = 0
         self.label.y = y
 
-    def update(self, input_data: dict[InputDataType, str]) -> None:
-        text = input_data[self.input_key]
+        self.display_elements = [self.label]
+
+    def update(self, input_data: dict[InputDataType, dict[str, Any]]) -> None:
+        text = input_data[self.input_key]["text"]
         if self.label.text.strip() != text:
             self.label.text = text
+
+
+class MPDModule(Module):
+    def __init__(
+        self,
+        config: Config,
+        font,
+        input_key: InputDataType,
+        y_char: int,
+        align: Literal["left", "right"],
+        max_chars: int,
+        animate_time: float = 1.0,
+    ) -> None:
+        super().__init__(
+            config=config,
+            font=font,
+            input_key=input_key,
+            y_char=y_char,
+            align=align,
+            max_chars=max_chars,
+            animate_time=animate_time,
+        )
+        self.bar_width = config.display.width
+        self.bar = displayio.Bitmap(self.bar_width, 1, 2)
+        self.palette = displayio.Palette(2)
+        self.palette[0] = 0x000000
+        self.palette[1] = 0xFFFFFF
+        self.bar_grid = displayio.TileGrid(
+            self.bar,
+            pixel_shader=self.palette,
+            x=0,
+            y=config.display.height - 1,
+        )
+
+        self.display_elements = [self.label, self.bar_grid]
+
+    def update(self, input_data: dict[InputDataType, dict[str, str | int]]) -> None:
+        text = input_data[self.input_key]["text"]
+        if self.label.text.strip() != text:
+            self.label.text = text
+
+        dur = int(input_data[self.input_key]["dur"])
+        pos = int(input_data[self.input_key]["pos"])
+
+        bar_fill = int((pos / dur) * self.bar_width)
+
+        for x in range(self.bar_width):
+            self.bar[x, 0] = 1 if x < bar_fill else 0
 
 
 class StatusDisplay:
@@ -185,23 +235,26 @@ class StatusDisplay:
 
         modules = [
             Module(self.config, self.font, "time", align="right", max_chars=8, y_char=0),
-            Module(
+            MPDModule(
                 self.config,
                 self.font,
                 "mpd",
                 align="left",
                 y_char=2,
-                max_chars=20,
+                max_chars=self.config.max_chars_x,
+                animate_time=0.5,
             ),
         ]
         for module in modules:
-            self.display_group.append(module.label)
-            self.dynamic_labels.append(module.label)
+            for element in module.display_elements:
+                self.display_group.append(element)
+                if isinstance(element, bitmap_label.Label):
+                    self.dynamic_labels.append(element)
 
         while True:
             input_data_str = self.get_cdc_input_with_buffer()
             if input_data_str is not None:
-                input_data: dict[InputDataType, str] = json.loads(input_data_str)
+                input_data: dict[InputDataType, dict[str, Any]] = json.loads(input_data_str)
                 for module in modules:
                     module.update(input_data)
 
