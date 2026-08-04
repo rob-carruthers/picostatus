@@ -71,27 +71,32 @@ class Module:
         config: Config,
         font,
         input_key: InputDataType,
-        x_char: int,
         y_char: int,
-        scroll: tuple[int, float] | None = None,
+        align: Literal["left", "right"],
+        max_chars: int,
+        animate_time: float = 1.0,
     ) -> None:
         self.input_key = input_key
         self.line = y_char
-        x = (((config.max_chars_x + x_char) * config.font.char_width) % config.display.width) - 1
-        max_chars = scroll[0] if scroll is not None else None
-        animate_time = scroll[1] if scroll is not None else 1.0
+
+        y = config.line_pos_y[y_char]
+
         self.label = bitmap_label.Label(
             font,
-            text="",
-            x=x,
-            y=config.line_pos_y[y_char],
+            text=" " * (max_chars or 1),
             max_characters=max_chars,
             animate_time=animate_time,
         )
 
+        if align == "right":
+            self.label.x = config.display.width - (max_chars or 1) * config.font.char_width
+        else:
+            self.label.x = 0
+        self.label.y = y
+
     def update(self, input_data: dict[InputDataType, str]) -> None:
         text = input_data[self.input_key]
-        if self.label.text != text:
+        if self.label.text.strip() != text:
             self.label.text = text
 
 
