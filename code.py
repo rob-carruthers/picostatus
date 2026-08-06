@@ -71,15 +71,12 @@ class Module:
         config: Config,
         font,
         input_key: InputDataType,
-        y_char: int,
+        y: int,
         align: Literal["left", "right"],
         max_chars: int,
         animate_time: float = 1.0,
     ) -> None:
         self.input_key = input_key
-        self.line = y_char
-
-        y = config.line_pos_y[y_char]
 
         self.label = bitmap_label.Label(
             font,
@@ -108,7 +105,7 @@ class MPDModule(Module):
         config: Config,
         font,
         input_key: InputDataType,
-        y_char: int,
+        y: int,
         align: Literal["left", "right"],
         max_chars: int,
         animate_time: float = 1.0,
@@ -117,7 +114,7 @@ class MPDModule(Module):
             config=config,
             font=font,
             input_key=input_key,
-            y_char=y_char,
+            y=y,
             align=align,
             max_chars=max_chars,
             animate_time=animate_time,
