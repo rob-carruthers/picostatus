@@ -124,7 +124,7 @@ class MPDModule(Module):
         )
 
         self.icon_width = 6
-        self.icon_height = 6
+        self.icon_height = 7
         self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
         self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=0, y=y - 3)
 
