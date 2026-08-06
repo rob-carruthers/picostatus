@@ -55,15 +55,6 @@ class Config:
         """Maximum displayable characters along height."""
         return self.display.height // self.font.char_height
 
-    @property
-    def line_pos_y(self) -> dict[int, int]:
-        output: dict[int, int] = {}
-
-        for i in range(self.max_chars_y):
-            output[i] = i * self.font.char_height + 4
-
-        return output
-
 
 class Module:
     def __init__(
