@@ -116,9 +116,10 @@ class MPDModule(Module):
             input_key=input_key,
             y=y,
             align=align,
-            max_chars=max_chars,
+            max_chars=max_chars - 1,
             animate_time=animate_time,
         )
+        self.label.x = 9
         self.bar_width = config.display.width
         self.bar = displayio.Bitmap(self.bar_width, 1, 2)
         self.palette = displayio.Palette(2)
@@ -131,15 +132,66 @@ class MPDModule(Module):
             y=config.display.height - 1,
         )
 
-        self.display_elements = [self.label, self.bar_grid]
+        self.icon_width = 6
+        self.icon_height = 6
+        self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
+        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=0, y=y - 3)
+
+        for j in range(self.icon_height):
+            for i in range(self.icon_width):
+                self.icon[i, j] = 1
+
+        self.display_elements = [self.label, self.bar_grid, self.icon_grid]
+
+        self.icon_dispatcher = {
+            "stop": self.icon_fill_all,
+            "play": self.icon_play,
+            "pause": self.icon_pause,
+        }
+
+    def icon_blank(self) -> None:
+        for i in range(self.icon_width):
+            for j in range(self.icon_height):
+                self.icon[i, j] = 0
+
+    def icon_fill_all(self) -> None:
+        for i in range(self.icon_width):
+            for j in range(self.icon_height):
+                self.icon[i, j] = 1
+
+    def icon_play(self) -> None:
+        self.icon_blank()
+
+        for i in range(self.icon_width):
+            for j in range(self.icon_height):
+                if j < i or (j >= (self.icon_height - i)):
+                    continue
+                self.icon[i, j] = 1
+
+    def icon_pause(self) -> None:
+        self.icon_fill_all()
+
+        r = list(range(self.icon_width))
+        low = self.icon_width // 3
+        high = self.icon_width * 2 // 3
+        for i in r[low:high]:
+            for j in range(self.icon_height):
+                self.icon[i, j] = 0
 
     def update(self, input_data: dict[InputDataType, dict[str, str | int]]) -> None:
-        text = input_data[self.input_key]["text"]
+        mpd_data = input_data[self.input_key]
+        text = mpd_data["text"]
+        state = str(mpd_data["state"])
+
+        if not isinstance(text, str):
+            return
+        text = text + (" | " if text != "Stopped" else "")
         if self.label.text.strip() != text:
             self.label.text = text
 
-        dur = int(input_data[self.input_key]["dur"])
-        pos = int(input_data[self.input_key]["pos"])
+        dur = int(mpd_data["dur"])
+        pos = int(mpd_data["pos"])
+        self.icon_dispatcher[state]()
 
         bar_fill = int((pos / dur) * self.bar_width)
 
