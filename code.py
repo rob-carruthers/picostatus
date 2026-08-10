@@ -64,7 +64,7 @@ class Module:
         input_key: InputDataType,
         y: int,
         align: Literal["left", "right"],
-        max_chars: int,
+        max_chars: int | None,
         animate_time: float = 1.0,
     ) -> None:
         self.input_key = input_key
@@ -191,6 +191,76 @@ class MPDModule(Module):
             self.bar[x, 0] = 1 if x < bar_fill else 0
 
 
+class PulseModule(Module):
+    def __init__(
+        self,
+        config: Config,
+        font,
+        input_key: InputDataType,
+        y: int,
+        align: Literal["left", "right"],
+    ) -> None:
+        super().__init__(
+            config=config,
+            font=font,
+            input_key=input_key,
+            y=y,
+            align=align,
+            max_chars=None,
+        )
+        self.label.x = 99
+        self.palette = displayio.Palette(2)
+        self.palette[0] = 0x000000
+        self.palette[1] = 0xFFFFFF
+
+        self.icon_width = 6
+        self.icon_height = 6
+        self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
+        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=88, y=y - 3)
+
+        for j in range(self.icon_height):
+            for i in range(self.icon_width):
+                self.icon[i, j] = 1
+
+        self.display_elements = [self.label, self.icon_grid]
+
+    def icon_blank(self) -> None:
+        for i in range(self.icon_width):
+            for j in range(self.icon_height):
+                self.icon[i, j] = 0
+
+    def icon_headset(self) -> None:
+        icon = [
+            [0, 1, 1, 1, 1, 0],
+            [1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1],
+            [1, 1, 0, 0, 1, 1],
+            [1, 1, 0, 0, 1, 1],
+        ]
+
+        for j, line in enumerate(icon):
+            for i, px in enumerate(line):
+                self.icon[i, j] = px
+
+    def update(self, input_data: dict[InputDataType, dict[str, str | bool]]) -> None:
+        pulse_data = input_data[self.input_key]
+        text = pulse_data["text"]
+        is_headset = pulse_data["is_headset"]
+
+        if not isinstance(text, str):
+            return
+
+        if self.label.text.strip() != text:
+            text = text + ("    " if text != "Stopped" else "")
+            self.label.text = text
+
+        if is_headset:
+            self.icon_headset()
+        else:
+            self.icon_blank()
+
+
 class StatusDisplay:
     """Main display."""
 
@@ -220,12 +290,11 @@ class StatusDisplay:
                 max_chars=8,
                 y=4,
             ),
-            Module(
+            PulseModule(
                 self.config,
                 self.font,
                 "pulse",
                 align="right",
-                max_chars=6,
                 y=14,
             ),
             Module(
