@@ -216,7 +216,7 @@ class PulseModule(Module):
         self.icon_width = 6
         self.icon_height = 6
         self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
-        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=88, y=y - 3)
+        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=89, y=y - 3)
 
         for j in range(self.icon_height):
             for i in range(self.icon_width):
