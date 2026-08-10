@@ -56,6 +56,11 @@ class Config:
         return self.display.height // self.font.char_height
 
 
+PALETTE = displayio.Palette(2)
+PALETTE[0] = 0x000000
+PALETTE[1] = 0xFFFFFF
+
+
 class Module:
     def __init__(
         self,
@@ -113,12 +118,9 @@ class MPDModule(Module):
         self.label.x = 10
         self.bar_width = config.display.width
         self.bar = displayio.Bitmap(self.bar_width, 1, 2)
-        self.palette = displayio.Palette(2)
-        self.palette[0] = 0x000000
-        self.palette[1] = 0xFFFFFF
         self.bar_grid = displayio.TileGrid(
             self.bar,
-            pixel_shader=self.palette,
+            pixel_shader=PALETTE,
             x=0,
             y=config.display.height - 1,
         )
@@ -126,7 +128,7 @@ class MPDModule(Module):
         self.icon_width = 6
         self.icon_height = 7
         self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
-        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=0, y=y - 3)
+        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=PALETTE, x=0, y=y - 3)
 
         for j in range(self.icon_height):
             for i in range(self.icon_width):
@@ -209,14 +211,11 @@ class PulseModule(Module):
             max_chars=None,
         )
         self.label.x = 99
-        self.palette = displayio.Palette(2)
-        self.palette[0] = 0x000000
-        self.palette[1] = 0xFFFFFF
 
         self.icon_width = 6
         self.icon_height = 6
         self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
-        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=self.palette, x=89, y=y - 3)
+        self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=PALETTE, x=89, y=y - 3)
 
         for j in range(self.icon_height):
             for i in range(self.icon_width):
