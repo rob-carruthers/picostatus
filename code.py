@@ -107,10 +107,10 @@ class MPDModule(Module):
             input_key=input_key,
             y=y,
             align=align,
-            max_chars=max_chars - 1,
+            max_chars=max_chars,
             animate_time=animate_time,
         )
-        self.label.x = 9
+        self.label.x = 10
         self.bar_width = config.display.width
         self.bar = displayio.Bitmap(self.bar_width, 1, 2)
         self.palette = displayio.Palette(2)
@@ -176,8 +176,9 @@ class MPDModule(Module):
 
         if not isinstance(text, str):
             return
-        text = text + (" | " if text != "Stopped" else "")
+
         if self.label.text.strip() != text:
+            text = text + ("    " if text != "Stopped" else "")
             self.label.text = text
 
         dur = int(mpd_data["dur"])
@@ -233,7 +234,7 @@ class StatusDisplay:
                 "mpd",
                 align="left",
                 y=24,
-                max_chars=self.config.max_chars_x,
+                max_chars=self.config.max_chars_x - 2,
                 animate_time=0.5,
             ),
         ]
