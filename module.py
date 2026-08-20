@@ -196,6 +196,25 @@ class PulseModule(Module):
                 self.icon[i, j] = 1
 
         self.display_elements = [self.label, self.icon_grid]
+        self.icons: dict[Literal["headset", "speaker"], list[list[int]]] = {
+            "headset": [
+                [0, 1, 1, 1, 1, 0],
+                [1, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 1],
+                [1, 1, 0, 0, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+            ],
+            "speaker": [
+                [0, 0, 1, 0, 0, 0],
+                [0, 1, 1, 0, 1, 0],
+                [1, 1, 1, 0, 0, 1],
+                [1, 1, 1, 0, 0, 1],
+                [0, 1, 1, 0, 1, 0],
+                [0, 0, 1, 0, 0, 0],
+            ],
+        }
+        self.current_icon: Literal["headset", "speaker"] | None = None
 
     def icon_blank(self) -> None:
         """Set all icon px values to 0."""
@@ -203,17 +222,9 @@ class PulseModule(Module):
             for j in range(self.icon_height):
                 self.icon[i, j] = 0
 
-    def icon_headset(self) -> None:
+    def set_icon(self, icon_type: Literal["headset", "speaker"]) -> None:
         """Create a headset icon."""
-        icon = [
-            [0, 1, 1, 1, 1, 0],
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
-            [1, 1, 0, 0, 1, 1],
-            [1, 1, 0, 0, 1, 1],
-        ]
-
+        icon = self.icons[icon_type]
         for j, line in enumerate(icon):
             for i, px in enumerate(line):
                 self.icon[i, j] = px
@@ -231,7 +242,7 @@ class PulseModule(Module):
             text = text + ("    " if text != "Stopped" else "")
             self.label.text = text
 
-        if is_headset:
-            self.icon_headset()
-        else:
-            self.icon_blank()
+        icon = "headset" if is_headset else "speaker"
+        if icon != self.current_icon:
+            self.set_icon(icon)
+            self.current_icon = icon
