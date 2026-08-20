@@ -95,9 +95,7 @@ class MPDModule(Module):
         self.icon = displayio.Bitmap(self.icon_width, self.icon_height, 2)
         self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=PALETTE, x=icon_x, y=y - 3)
 
-        for j in range(self.icon_height):
-            for i in range(self.icon_width):
-                self.icon[i, j] = 1
+        self.icon_blank()
 
         self.display_elements = [self.label, self.bar_grid, self.icon_grid]
 
@@ -191,9 +189,7 @@ class PulseModule(Module):
         icon_x = 89
         self.icon_grid = displayio.TileGrid(self.icon, pixel_shader=PALETTE, x=icon_x, y=y - 3)
 
-        for j in range(self.icon_height):
-            for i in range(self.icon_width):
-                self.icon[i, j] = 1
+        self.icon_blank()
 
         self.display_elements = [self.label, self.icon_grid]
         self.icons: dict[Literal["headset", "speaker"], list[list[int]]] = {
