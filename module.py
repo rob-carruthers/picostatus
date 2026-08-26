@@ -222,7 +222,7 @@ class PulseModule(Module):
                 self.icon[i, j] = 0
 
     def set_icon(self, icon_type: Literal["headset", "speaker"]) -> None:
-        """Create a headset icon."""
+        """Create an icon."""
         icon = self.icons[icon_type]
         for j, line in enumerate(icon):
             for i, px in enumerate(line):
