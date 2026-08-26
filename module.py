@@ -231,10 +231,10 @@ class PulseModule(Module):
     def update(self, input_data: dict[InputDataType, dict[str, str | bool]]) -> None:
         """Update output from PulseAudio data input."""
         pulse_data = input_data[self.input_key]
-        text = pulse_data["text"]
-        is_headset = pulse_data["is_headset"]
+        text = pulse_data.get("text")
+        is_headset = pulse_data.get("is_headset")
 
-        if not isinstance(text, str):
+        if not isinstance(text, str) or not isinstance(is_headset, bool):
             return
 
         if self.label.text.strip() != text:
