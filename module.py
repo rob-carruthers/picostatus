@@ -155,7 +155,10 @@ class MPDModule(Module):
         pos = int(mpd_data["pos"])
         self.icon_dispatcher[state]()
 
-        bar_fill = int((pos / dur) * self.bar_width)
+        try:
+            bar_fill = int((pos / dur) * self.bar_width)
+        except ZeroDivisionError:
+            bar_fill = 0
 
         for x in range(self.bar_width):
             self.bar[x, 0] = 1 if x < bar_fill else 0
