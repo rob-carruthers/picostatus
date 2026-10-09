@@ -66,7 +66,7 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
         out_data = {
             "time": {"text": nowstr},
             "mpd": {"text": now_playing, "dur": dur, "pos": pos},
-            "pacman": {"text": n_updates},
+            "updates": {"text": n_updates},
         }
         out_json = json.dumps(out_data)
 

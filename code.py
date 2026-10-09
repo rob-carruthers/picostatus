@@ -67,7 +67,7 @@ class StatusDisplay:
             Module(
                 self.config,
                 self.font,
-                "pacman",
+                "updates",
                 align="left",
                 max_chars=12,
                 y=4,
