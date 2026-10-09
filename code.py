@@ -72,6 +72,14 @@ class StatusDisplay:
                 max_chars=12,
                 y=4,
             ),
+            Module(
+                self.config,
+                self.font,
+                "ynab",
+                align="left",
+                max_chars=15,
+                y=14,
+            ),
             MPDModule(
                 self.config,
                 self.font,

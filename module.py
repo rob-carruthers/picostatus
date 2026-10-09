@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from config import Config
 
-    InputDataType = Literal["time", "mpd", "updates", "pulse"]
+    InputDataType = Literal["time", "mpd", "updates", "pulse", "ynab"]
 
 
 class Module:
